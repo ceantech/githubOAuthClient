@@ -1,13 +1,51 @@
+# WORK IN PROGRESS
 # Github Client using OAuth2.0
 
-A simple github web app for performing git operations, built over go-github package utilizing github REST APIs, OAuth2.0 for authroization.
+A simple github web app for performing git operations, built over go-github package utilizing github REST APIs, OAuth2.0 for authroization. Idea is to demo list of repos for authenticated user, create a new branch, create a commit, using which create a new PR in newly created branch.
 
 To authorize user with GitHub using OAuth2.0, register the application and generate client_id, client_secret and keep them safely, specially the secret. No where we are going to store the client id or secret in the code.
 
-Refer https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
+Refer [Authorizing OAuth Apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow)
 
-Use https://github.com/settings/applications/new
+Register new OAuth Apps [here](https://github.com/settings/applications/new)
 
+
+## Temporarily some manual changes needed
+Currently App doesnt have enough frontend html to take input on repo name, and modified file to consider for a new commit, so need to update same in code [('sourceRepo','prRepo'), ('fileForAutoCommit')] to make it work for any user (i know its dirty, though need to take care of this in future only). Until then, following git diff should help to make necessary changes quickly. 
+```
+    cmd$ git diff
+    diff --git a/cmd/githubOperations.go b/cmd/githubOperations.go
+    index ab72e60..197012e 100644
+    --- a/cmd/githubOperations.go
+    +++ b/cmd/githubOperations.go
+    @@ -21,7 +21,7 @@ type Package struct {
+            LastUpdatedBy string
+    }
+    
+    -var fileForAutoCommit = "commitTimeStamps.txt"
+    +var fileForAutoCommit = "tmp.txt"
+    
+    func editSampleFile(file string, data string) bool {
+            fmt.Printf("\nEditing file for commit: %s\n", file)
+    diff --git a/cmd/main.go b/cmd/main.go
+    index bbd6602..d6d9b37 100644
+    --- a/cmd/main.go
+    +++ b/cmd/main.go
+    @@ -58,9 +58,9 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
+            //fmt.Println(*user)
+    
+            *sourceOwner = *user.Login
+    -       *sourceRepo = "gomods" //DEFAULT, need to take as i/p ideally
+    +       *sourceRepo = "dummyrepo" //DEFAULT, need to take as i/p ideally
+            *prRepoOwner = *user.Login
+    -       *prRepo = "gomods" //DEFAULT
+    +       *prRepo = "dummyrepo" //DEFAULT
+            *authorName = *user.Name
+            *authorEmail = "dummy@gmail.com"
+```
+
+### Additional care
+Also make sure to ***keep Repo description populated*** (About section in repo page), or app may run into errors.
 
 ## Build
 Build docker container with supplied Dockerfile in parent dir
